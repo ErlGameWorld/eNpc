@@ -7,13 +7,13 @@
 main(Args) ->
    file:set_cwd("c_src"),
    {ok, Dir} = file:get_cwd(),
-   io:format("erlNpc begin compile pwd:~p ~n", [Dir]),
+   io:format("erlNpc begin compile pwd:~15.p ~n", [Dir]),
    FunCom =
       fun(File) ->
          case filelib:is_dir(File) == true andalso lists:nth(1, File) =/= 46 andalso filename:basename(File) =/= "include" of
             true ->
                {ok, CurDir} = file:get_cwd(),
-               io:format("erlNpc cur compile/clean: ~s,  cur pwd:~p ~n", [File, CurDir]),
+               io:format("erlNpc cur ~p: ~-18.s,  cur pwd:~p ~n", [Args, File, CurDir]),
                file:set_cwd(File),
                rebar:main(Args),
                file:set_cwd("..");
