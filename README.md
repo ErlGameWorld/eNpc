@@ -15,4 +15,4 @@ default_env
 {post_hooks, [{"", clean, "escript c_src/erlNpc clean"}]}.
 ```
 
-After that enc should read your old rebar.config `port\_specs` and `port\_env` settings as expected (it is rebar2's port compiler after all...).
+After that erlNpc should read your old rebar.config `port\_specs` and `port\_env` settings as expected (it is rebar2's port compiler after all...).
