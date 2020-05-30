@@ -111,7 +111,7 @@ infoHelp(Description) ->
       "           CXXFLAGS - C++ compiler~n"
       "           LDFLAGS  - Link flags~n"
       "           ERL_CFLAGS  - default -I paths for erts and ei~n"
-      "           ERL_LDFLAGS - default -L and -lerl_interface -lei~n"
+      "           ERL_LDFLAGS - default -L and -lei~n"
       "           DRV_CFLAGS  - flags that will be used for compiling~n"
       "           DRV_LDFLAGS - flags that will be used for linking~n"
       "           EXE_CFLAGS  - flags that will be used for compiling~n"
@@ -618,13 +618,13 @@ targetType_1(".dll") -> drv;
 targetType_1("") -> exe;
 targetType_1(".exe") -> exe.
 
-erlInterfaceDir(Subdir) ->
-   case code:lib_dir(erl_interface, Subdir) of
-      {error, bad_name} ->
-         throw({error, {erl_interface, Subdir, "code:lib_dir(erl_interface)"
-         "is unable to find the erl_interface library."}});
-      Dir -> Dir
-   end.
+% erlInterfaceDir(Subdir) ->
+%    case code:lib_dir(erl_interface, Subdir) of
+%       {error, bad_name} ->
+%          throw({error, {erl_interface, Subdir, "code:lib_dir(erl_interface)"
+%          "is unable to find the erl_interface library."}});
+%       Dir -> Dir
+%    end.
 
 defaultEnv() ->
    Arch = os:getenv("REBAR_TARGET_ARCH"),
@@ -665,12 +665,10 @@ defaultEnv() ->
 
       {"ERL_CFLAGS", lists:concat(
          [
-            " -I\"", erlInterfaceDir(include),
             "\" -I\"", filename:join(ertsDir(), "include"),
             "\" "
          ])},
-      {"ERL_EI_LIBDIR", lists:concat(["\"", erlInterfaceDir(lib), "\""])},
-      {"ERL_LDFLAGS", " -L$ERL_EI_LIBDIR -lerl_interface -lei"},
+      {"ERL_LDFLAGS", " -L$ERL_EI_LIBDIR -lei"},
       {"ERLANG_ARCH", rebarUtils:wordsize()},
       {"ERLANG_TARGET", rebarUtils:getArch()},
 
@@ -722,7 +720,7 @@ defaultEnv() ->
          "$LINKER $PORT_IN_FILES $LDFLAGS $EXE_LDFLAGS /OUT:$PORT_OUT_FILE"},
       %% ERL_CFLAGS are ok as -I even though strictly it should be /I
       {"win32", "ERL_LDFLAGS",
-         " /LIBPATH:$ERL_EI_LIBDIR erl_interface.lib ei.lib"},
+         " /LIBPATH:$ERL_EI_LIBDIR ei.lib"},
       {"win32", "DRV_CFLAGS", "/Zi /Wall $ERL_CFLAGS"},
       {"win32", "DRV_LDFLAGS", "/DLL $ERL_LDFLAGS"},
       %% Provide some default Windows defines for convenience
