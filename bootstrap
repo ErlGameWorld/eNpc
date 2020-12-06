@@ -66,16 +66,16 @@ main(Args) ->
       up_to_date ->
          ok;
       error ->
-         io:format("Failed to compile erlNpc files!\n"),
+         io:format("Failed to compile eNpc files!\n"),
          halt(1)
    end,
 
    %% Make sure file:consult can parse the .app file
-   case file:consult("ebin/erlNpc.app") of
+   case file:consult("ebin/eNpc.app") of
       {ok, _} ->
          ok;
       {error, Reason} ->
-         io:format("Invalid syntax in ebin/erlNpc.app: ~p\n", [Reason]),
+         io:format("Invalid syntax in ebin/eNpc.app: ~p\n", [Reason]),
          halt(1)
    end,
 
@@ -93,7 +93,7 @@ main(Args) ->
    %%  or write out script files on win32.
    case os:type() of
       {unix, _} ->
-         [] = os:cmd("chmod u+x erlNpc"),
+         [] = os:cmd("chmod u+x eNpc"),
          ok;
       {win32, _} ->
          writeWindowsScripts(),
@@ -104,10 +104,10 @@ main(Args) ->
 
    %% Add a helpful message
    io:format(<<"Congratulations! You now have a self-contained script called"
-   " \"erlNpc\" in\n"
+   " \"eNpc\" in\n"
    "your current working directory. "
    "Place this script anywhere in your path\n"
-   "and you can use erlNpc to build native code for Erlang\n">>).
+   "and you can use eNpc to build native code for Erlang\n">>).
 
 usage() ->
    io:format(<<"Usage: bootstrap [OPTION]...~n">>),
@@ -157,12 +157,12 @@ writeWindowsScripts() ->
       "setlocal\r\n"
       "set rebarscript=%~f0\r\n"
       "escript.exe \"%rebarscript:.cmd=%\" %*\r\n",
-   ok = file:write_file("erlNpc.cmd", CmdScript).
+   ok = file:write_file("eNpc.cmd", CmdScript).
 
 
 escriptize() ->
-   AppName = "erlNpc",
-   ScriptName = "erlNpc",
+   AppName = "eNpc",
+   ScriptName = "eNpc",
 
    Files = loadEScriptFiles(AppName, "ebin", "*"),
 

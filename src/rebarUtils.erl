@@ -240,12 +240,12 @@ processingBaseDir(Config, Dir) ->
    AbsDir =:= baseDir(Config).
 
 otpRelease() ->
-   case application:get_env(erlNpc, memoized_otp_release) of
+   case application:get_env(eNpc, memoized_otp_release) of
       {ok, Return} ->
          Return;
       undefined ->
          Return = otpRelease_1(erlang:system_info(otp_release)),
-         application:set_env(erlNpc, memoized_otp_release, Return),
+         application:set_env(eNpc, memoized_otp_release, Return),
          Return
    end.
 

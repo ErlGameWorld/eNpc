@@ -35,7 +35,7 @@ main(Args) ->
    end.
 
 log(Level, Format, Args) ->
-   {ok, LimitLevel} = application:get_env(erlNpc, log_level),
+   {ok, LimitLevel} = application:get_env(eNpc, log_level),
    case levelInt(LimitLevel) >= levelInt(Level) of
       true ->
          io:format(destination(Level), Format, Args);
@@ -68,10 +68,10 @@ run(RawArgs) ->
 
 loadRebarApp() ->
    %% Pre-load the rebar app so that we get default configuration
-   case application:load(erlNpc) of
+   case application:load(eNpc) of
       ok ->
          ok;
-      {error, {already_loaded,erlNpc}} ->
+      {error, {already_loaded,eNpc}} ->
          ok;
       _ ->
          rebarUtils:delayedHalt(1)
@@ -82,7 +82,7 @@ help(compile) ->
 help(clean) ->
    rebarNpCompiler:info(help, clean);
 help(Command) ->
-   ?CONSOLE("erlNpc no help available for \"~p\"~n", [Command]).
+   ?CONSOLE("eNpc no help available for \"~p\"~n", [Command]).
 
 parseArgs([]) ->
    {[], []};
@@ -110,7 +110,7 @@ parseArgs([NonOpt | Rest]) ->
    {Opts, [NonOpt | NonOpts]}.
 
 usage() ->
-   ?CONSOLE("erlNpc [-hv] [-c CONFIG_FILE] COMMAND [COMMAND ...]~n~n", []).
+   ?CONSOLE("eNpc [-hv] [-c CONFIG_FILE] COMMAND [COMMAND ...]~n~n", []).
 
 initConfig({Options, _NonOptArgs}) ->
    %% If $HOME/.rebar/config exists load and use as global config
@@ -202,8 +202,8 @@ saveOptions(Config, {Options, NonOptArgs}) ->
 
 %% show version information and halt
 version() ->
-   {ok, Vsn} = application:get_key(erlNpc, vsn),
-   ?CONSOLE("erlNpc ~s ~s ~s ~s\n", [Vsn, ?OTP_INFO, ?BUILD_TIME, ?VCS_INFO]).
+   {ok, Vsn} = application:get_key(eNpc, vsn),
+   ?CONSOLE("eNpc ~s ~s ~s ~s\n", [Vsn, ?OTP_INFO, ?BUILD_TIME, ?VCS_INFO]).
 
 %% Seperate all commands (single-words) from flags (key=value) and store
 %% values into the rebar_config global storage.
