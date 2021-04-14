@@ -1,6 +1,6 @@
--module(rebarUtils).
+-module(npRUtils).
 
--include("rebar.hrl").
+-include("eNpc.hrl").
 
 -export([
    getCwd/0,
@@ -49,7 +49,7 @@ get_system_arch(Arch) ->
    Arch.
 
 isAppDir() ->
-   isAppDir(rebarUtils:getCwd()).
+   isAppDir(npRUtils:getCwd()).
 
 isAppDir(Dir) ->
    SrcDir = filename:join([Dir, "src"]),
@@ -91,11 +91,11 @@ appName(Config, AppFile) ->
 
 loadAppFile(Config, Filename) ->
    AppFile = {app_file, Filename},
-   case rebarConfig:getXconf(Config, {appfile, AppFile}, undefined) of
+   case npRConfig:getXconf(Config, {appfile, AppFile}, undefined) of
       undefined ->
          case consultAppFile(Filename) of
             {ok, {application, AppName, AppData}} ->
-               Config1 = rebarConfig:setXconf(Config,
+               Config1 = npRConfig:setXconf(Config,
                   {appfile, AppFile},
                   {AppName, AppData}),
                {ok, Config1, AppName, AppData};
@@ -114,7 +114,7 @@ consultAppFile(Filename) ->
                true ->
                   file:consult(Filename);
                false ->
-                  rebarConfig:consultFile(Filename)
+                  npRConfig:consultFile(Filename)
             end,
    case Result of
       {ok, [Term]} ->
@@ -188,11 +188,11 @@ initVsnCache(Config) ->
    initVsnCache(Config, os:getenv("REBAR_VSN_CACHE_FILE")).
 
 initVsnCache(Config, false) ->
-   rebarConfig:setXconf(Config, vsn_cache, dict:new());
+   npRConfig:setXconf(Config, vsn_cache, dict:new());
 initVsnCache(Config, CacheFile) ->
    {ok, CacheList} = file:consult(CacheFile),
    CacheDict = dict:from_list(CacheList),
-   rebarConfig:setXconf(Config, vsn_cache, CacheDict).
+   npRConfig:setXconf(Config, vsn_cache, CacheDict).
 
 -spec delayedHalt(integer()) -> no_return().
 delayedHalt(Code) ->
@@ -229,10 +229,10 @@ deleteEach([File | Rest]) ->
    end.
 
 baseDir(Config) ->
-   rebarConfig:getXconf(Config, base_dir).
+   npRConfig:getXconf(Config, base_dir).
 
 processingBaseDir(Config) ->
-   Cwd = rebarUtils:getCwd(),
+   Cwd = npRUtils:getCwd(),
    processingBaseDir(Config, Cwd).
 
 processingBaseDir(Config, Dir) ->

@@ -1,6 +1,6 @@
--module(rebarNpCompiler).
+-module(npRCompiler).
 
--include("rebar.hrl").
+-include("eNpc.hrl").
 
 -export([
    compile/2,
@@ -28,7 +28,7 @@ compile(Config, AppFile) ->
       [] ->
          ok;
       Specs ->
-         SharedEnv = rebarConfig:getEnv(Config, ?MODULE),
+         SharedEnv = npRConfig:getEnv(Config, ?MODULE),
 
          %% Compile each of the sources
          NewBins = compileSources(Config, Specs, SharedEnv),
@@ -52,7 +52,7 @@ compile(Config, AppFile) ->
                      LinkTemplate = selectLinkTemplate(LinkLang, Target),
                      Env = proplists:get_value(env, Opts, SharedEnv),
                      Cmd = expandCommand(LinkTemplate, Env, string:join(Bins, " "), Target),
-                     rebarUtils:sh(Cmd, [{env, Env}]);
+                     npRUtils:sh(Cmd, [{env, Env}]);
                   false ->
                      ?INFO("Skipping relink of ~s\n", [Target]),
                      ok
@@ -67,9 +67,9 @@ clean(Config, AppFile) ->
       Specs ->
          lists:foreach(
             fun(#spec{target = Target, objects = Objects}) ->
-               rebarUtils:deleteEach([Target]),
-               rebarUtils:deleteEach(Objects),
-               rebarUtils:deleteEach(portDeps(Objects))
+               npRUtils:deleteEach([Target]),
+               npRUtils:deleteEach(Objects),
+               npRUtils:deleteEach(portDeps(Objects))
             end, Specs)
    end,
    ok.
@@ -156,8 +156,8 @@ infoHelp(Description) ->
 
 %% set REBAR_DEPS_DIR and ERL_LIBS environment variables
 defaultEnv(Config) ->
-   BaseDir = rebarUtils:baseDir(Config),
-   DepsDir0 = rebarConfig:getXconf(Config, deps_dir, "deps"),
+   BaseDir = npRUtils:baseDir(Config),
+   DepsDir0 = npRConfig:getXconf(Config, deps_dir, "deps"),
    DepsDir = filename:dirname(filename:join([BaseDir, DepsDir0, "dummy"])),
 
    %% include rebar's DepsDir in ERL_LIBS
@@ -185,10 +185,10 @@ setupEnv(Config, ExtraEnv) ->
 
    %% Get any port-specific envs; use port_env first and then fallback
    %% to port_envs for compatibility
-   RawPortEnv = rebarConfig:getList(
+   RawPortEnv = npRConfig:getList(
       Config,
       port_env,
-      rebarConfig:getList(Config, port_envs, [])),
+      npRConfig:getList(Config, port_envs, [])),
 
    PortEnv = filterEnv(RawPortEnv, []),
    Defines = getDefines(Config),
@@ -197,7 +197,7 @@ setupEnv(Config, ExtraEnv) ->
    expandVarsLoop(mergeEachVar(RawEnv, [])).
 
 getDefines(Config) ->
-   RawDefines = rebarConfig:getXconf(Config, defines, []),
+   RawDefines = npRConfig:getXconf(Config, defines, []),
    Defines = string:join(["-D" ++ D || D <- RawDefines], " "),
    [{"ERL_CFLAGS", "$ERL_CFLAGS " ++ Defines}].
 
@@ -264,7 +264,7 @@ cdbEntry(Src, Cmd, SrcRest) ->
          string:tokens(Cmd, " ")),
       " "),
 
-   Cwd = rebarUtils:getCwd(),
+   Cwd = npRUtils:getCwd(),
    %% If there are more source files, make sure we end the CDB entry
    %% with a comma.
    Sep = case SrcRest of
@@ -279,10 +279,10 @@ cdbEntry(Src, Cmd, SrcRest) ->
       [Src, Cwd, CDBCmd, Sep]).
 
 execCompiler(Config, Source, Cmd, ShOpts) ->
-   case rebarUtils:sh(Cmd, ShOpts) of
+   case npRUtils:sh(Cmd, ShOpts) of
       {error, {_RC, RawError}} ->
          AbsSource =
-            case rebarUtils:processingBaseDir(Config) of
+            case npRUtils:processingBaseDir(Config) of
                true ->
                   Source;
                false ->
@@ -337,7 +337,7 @@ needsLink(SoName, NewBins) ->
 
 getSpecs(Config, AppFile) ->
    Specs =
-      case rebarConfig:getLocal(Config, port_specs, []) of
+      case npRConfig:getLocal(Config, port_specs, []) of
          [] ->
             %% No spec provided. Construct a spec
             %% from old-school so_name and sources
@@ -352,17 +352,17 @@ getSpecs(Config, AppFile) ->
 portSpecFromLegacy(Config, AppFile) ->
    %% Get the target from the so_name variable
    Target =
-      case rebarConfig:get(Config, so_name, undefined) of
+      case npRConfig:get(Config, so_name, undefined) of
          undefined ->
             %% Generate a sensible default from app file
-            {_, AppName} = rebarUtils:appName(Config, AppFile),
+            {_, AppName} = npRUtils:appName(Config, AppFile),
             filename:join("priv", lists:concat([AppName, "_drv.so"]));
          AName ->
             %% Old form is available -- use it
             filename:join("priv", AName)
       end,
    %% Get the list of source files from port_sources
-   Sources = portSources(rebarConfig:getList(Config, port_sources, ["c_src/*.c"])),
+   Sources = portSources(npRConfig:getList(Config, port_sources, ["c_src/*.c"])),
    #spec{
       type = targetType(Target),
       link_lang = cc,
@@ -375,9 +375,9 @@ filterPortSpecs(Specs) ->
    [S || S <- Specs, filterPortSpec(S)].
 
 filterPortSpec({ArchRegex, _, _, _}) ->
-   rebarUtils:isArch(ArchRegex);
+   npRUtils:isArch(ArchRegex);
 filterPortSpec({ArchRegex, _, _}) ->
-   rebarUtils:isArch(ArchRegex);
+   npRUtils:isArch(ArchRegex);
 filterPortSpec({_, _}) ->
    true.
 
@@ -459,7 +459,7 @@ applyDefaults(Vars, Defaults) ->
          fun(Key, VarValue, DefaultValue) ->
             case isExpandable(DefaultValue) of
                true ->
-                  rebarUtils:expandEnvVariable(DefaultValue,
+                  npRUtils:expandEnvVariable(DefaultValue,
                      Key,
                      VarValue);
                false -> VarValue
@@ -481,10 +481,10 @@ mergeEachVar([{Key, Value} | Rest], Vars) ->
          error ->
             %% Nothing yet defined for this key/value.
             %% Expand any self-references as blank.
-            rebarUtils:expandEnvVariable(Value, Key, "");
+            npRUtils:expandEnvVariable(Value, Key, "");
          {ok, Value0} ->
             %% Use previous definition in expansion
-            rebarUtils:expandEnvVariable(Value, Key, Value0)
+            npRUtils:expandEnvVariable(Value, Key, Value0)
       end,
    mergeEachVar(Rest, orddict:store(Key, Evalue, Vars)).
 
@@ -537,7 +537,7 @@ expandKeysInValue([Key | Rest], Value, Vars) ->
    NewValue =
       case dict:find(Key, Vars) of
          {ok, KValue} ->
-            rebarUtils:expandEnvVariable(Value, Key, KValue);
+            npRUtils:expandEnvVariable(Value, Key, KValue);
          error ->
             Value
       end,
@@ -545,8 +545,8 @@ expandKeysInValue([Key | Rest], Value, Vars) ->
 
 expandCommand(TmplName, Env, InFiles, OutFile) ->
    Cmd0 = proplists:get_value(TmplName, Env),
-   Cmd1 = rebarUtils:expandEnvVariable(Cmd0, "PORT_IN_FILES", InFiles),
-   rebarUtils:expandEnvVariable(Cmd1, "PORT_OUT_FILE", OutFile).
+   Cmd1 = npRUtils:expandEnvVariable(Cmd0, "PORT_IN_FILES", InFiles),
+   npRUtils:expandEnvVariable(Cmd1, "PORT_OUT_FILE", OutFile).
 
 %%
 %% Given a string, determine if it is expandable
@@ -564,7 +564,7 @@ isExpandable(InStr) ->
 filterEnv([], Acc) ->
    lists:reverse(Acc);
 filterEnv([{ArchRegex, Key, Value} | Rest], Acc) ->
-   case rebarUtils:isArch(ArchRegex) of
+   case npRUtils:isArch(ArchRegex) of
       true ->
          filterEnv(Rest, [{Key, Value} | Acc]);
       false ->
@@ -671,8 +671,8 @@ defaultEnv() ->
          ])},
       {"ERL_EI_LIBDIR", lists:concat(["\"", erlInterfaceDir(lib), "\""])},
       {"ERL_LDFLAGS", " -L$ERL_EI_LIBDIR -lei"},
-      {"ERLANG_ARCH", rebarUtils:wordsize()},
-      {"ERLANG_TARGET", rebarUtils:getArch()},
+      {"ERLANG_ARCH", npRUtils:wordsize()},
+      {"ERLANG_TARGET", npRUtils:getArch()},
 
       {"darwin", "DRV_LDFLAGS",
          "-bundle -flat_namespace -undefined suppress $ERL_LDFLAGS"},

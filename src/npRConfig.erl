@@ -1,6 +1,6 @@
--module(rebarConfig).
+-module(npRConfig).
 
--include("rebar.hrl").
+-include("eNpc.hrl").
 
 -export([
    new/0,
@@ -39,18 +39,18 @@
 
 -spec baseConfig(config()) -> config().
 baseConfig(GlobalConfig) ->
-   ConfName = rebarConfig:getGlobal(GlobalConfig, config, ?DEFAULT_NAME),
+   ConfName = npRConfig:getGlobal(GlobalConfig, config, ?DEFAULT_NAME),
    new(GlobalConfig, ConfName).
 
 -spec new() -> config().
 new() ->
-   #config{dir = rebarUtils:getCwd()}.
+   #config{dir = npRUtils:getCwd()}.
 
 -spec new(file:filename() | config()) -> config().
 new(ConfigFile) when is_list(ConfigFile) ->
    case consultFile(ConfigFile) of
       {ok, Opts} ->
-         #config{dir = rebarUtils:getCwd(),
+         #config{dir = npRUtils:getCwd(),
             opts = Opts};
       Other ->
          ?ABORT("Failed to load ~s: ~p~n", [ConfigFile, Other])
@@ -140,7 +140,7 @@ getXconf(Config, Key, Default) ->
 -spec new(config(), file:filename()) -> config().
 new(ParentConfig, ConfName) ->
    %% Load terms from rebar.config, if it exists
-   Dir = rebarUtils:getCwd(),
+   Dir = npRUtils:getCwd(),
    ConfigFile = filename:join([Dir, ConfName]),
    Opts0 = ParentConfig#config.opts,
    Opts = case consultFile(ConfigFile) of

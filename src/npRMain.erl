@@ -1,11 +1,11 @@
--module(rebar).
+-module(npRMain).
 
 -export([
    main/1,
    log/3
 ]).
 
--include("rebar.hrl").
+-include("eNpc.hrl").
 
 -ifndef(BUILD_TIME).
 -define(BUILD_TIME, "undefined").
@@ -26,12 +26,12 @@ main(Args) ->
       ok ->
          ok;
       rebar_abort ->
-         rebarUtils:delayedHalt(1);
+         npRUtils:delayedHalt(1);
       Error ->
          %% Nothing should percolate up from rebar_core;
          %% Dump this error to console
          io:format("Uncaught error in rebar_core: ~p\n", [Error]),
-         rebarUtils:delayedHalt(1)
+         npRUtils:delayedHalt(1)
    end.
 
 log(Level, Format, Args) ->
@@ -74,13 +74,13 @@ loadRebarApp() ->
       {error, {already_loaded,eNpc}} ->
          ok;
       _ ->
-         rebarUtils:delayedHalt(1)
+         npRUtils:delayedHalt(1)
    end.
 
 help(compile) ->
-   rebarNpCompiler:info(help, compile);
+   npRCompiler:info(help, compile);
 help(clean) ->
-   rebarNpCompiler:info(help, clean);
+   npRCompiler:info(help, clean);
 help(Command) ->
    ?CONSOLE("eNpc no help available for \"~p\"~n", [Command]).
 
@@ -89,17 +89,17 @@ parseArgs([]) ->
 parseArgs(["-h" | _]) ->
    usage(),
    help(compile),
-   rebarUtils:delayedHalt(0);
+   npRUtils:delayedHalt(0);
 parseArgs(["--help" | _]) ->
    usage(),
    help(compile),
-   rebarUtils:delayedHalt(0);
+   npRUtils:delayedHalt(0);
 parseArgs(["-v" | _]) ->
    version(),
-   rebarUtils:delayedHalt(0);
+   npRUtils:delayedHalt(0);
 parseArgs(["--version" | _]) ->
    version(),
-   rebarUtils:delayedHalt(0);
+   npRUtils:delayedHalt(0);
 parseArgs(["-c", FileName | Rest]) ->
    {Opts, NonOpts} = parseArgs(Rest),
    {[{config, FileName} | Opts], NonOpts};
@@ -118,9 +118,9 @@ initConfig({Options, _NonOptArgs}) ->
    GlobalConfig =
       case filelib:is_regular(GlobalConfigFile) of
          true ->
-            rebarConfig:new(GlobalConfigFile);
+            npRConfig:new(GlobalConfigFile);
          false ->
-            rebarConfig:new()
+            npRConfig:new()
       end,
 
    %% Set the rebar config to use
@@ -129,24 +129,24 @@ initConfig({Options, _NonOptArgs}) ->
          undefined ->
             GlobalConfig;
          Conf ->
-            rebarConfig:setGlobal(GlobalConfig, config, Conf)
+            npRConfig:setGlobal(GlobalConfig, config, Conf)
       end,
 
-   BaseConfig = rebarConfig:baseConfig(GlobalConfig1),
+   BaseConfig = npRConfig:baseConfig(GlobalConfig1),
 
    %% Keep track of how many operations we do, so we can detect bad commands
-   BaseConfig1 = rebarConfig:setXconf(BaseConfig, operations, 0),
+   BaseConfig1 = npRConfig:setXconf(BaseConfig, operations, 0),
    %% Initialize vsn cache
-   rebarUtils:initVsnCache(BaseConfig1).
+   npRUtils:initVsnCache(BaseConfig1).
 
 initConfig_1(BaseConfig) ->
    %% Determine the location of the rebar executable; important for pulling
    %% resources out of the escript
    ScriptName = filename:absname(escript:script_name()),
-   BaseConfig1 = rebarConfig:setXconf(BaseConfig, escript, ScriptName),
+   BaseConfig1 = npRConfig:setXconf(BaseConfig, escript, ScriptName),
    %% Note the top-level directory for reference
-   AbsCwd = filename:absname(rebarUtils:getCwd()),
-   rebarConfig:setXconf(BaseConfig1, base_dir, AbsCwd).
+   AbsCwd = filename:absname(npRUtils:getCwd()),
+   npRConfig:setXconf(BaseConfig1, base_dir, AbsCwd).
 
 runAux(BaseConfig, Commands) ->
    %% Make sure crypto is running
@@ -182,22 +182,22 @@ setupEnvs(Config, Modules) ->
    lists:foldl(
       fun(Module, CfgAcc) ->
          Env = Module:setupEnv(CfgAcc),
-         rebarConfig:saveEnv(CfgAcc, Module, Env)
+         npRConfig:saveEnv(CfgAcc, Module, Env)
       end, Config, Modules).
 
 processCommand(compile, Config, AppFile) ->
-   rebarNpCompiler:compile(Config, AppFile);
+   npRCompiler:compile(Config, AppFile);
 
 processCommand(clean, Config, AppFile) ->
-   rebarNpCompiler:clean(Config, AppFile);
+   npRCompiler:clean(Config, AppFile);
 
 processCommand(Other, _, _) ->
    ?CONSOLE("Unknown command: ~s~n", [Other]),
-   rebarUtils:delayedHalt(1).
+   npRUtils:delayedHalt(1).
 
 saveOptions(Config, {Options, NonOptArgs}) ->
    GlobalDefines = proplists:get_all_values(defines, Options),
-   Config1 = rebarConfig:setXconf(Config, defines, GlobalDefines),
+   Config1 = npRConfig:setXconf(Config, defines, GlobalDefines),
    filterFlags(Config1, NonOptArgs, []).
 
 %% show version information and halt
@@ -222,7 +222,7 @@ filterFlags(Config, [Item | Rest], Commands) ->
                _ ->
                   RawValue
             end,
-         Config1 = rebarConfig:setGlobal(Config, Key, Value),
+         Config1 = npRConfig:setGlobal(Config, Key, Value),
          filterFlags(Config1, Rest, Commands);
       Other ->
          ?CONSOLE("Ignoring command line argument: ~p\n", [Other]),

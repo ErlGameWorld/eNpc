@@ -15,7 +15,7 @@ main(Args) ->
                {ok, CurDir} = file:get_cwd(),
                io:format("eNpc cur ~p: ~-18.s,  cur pwd:~p ~n", [Args, File, CurDir]),
                file:set_cwd(File),
-               rebar:main(Args),
+               npRMain:main(Args),
                file:set_cwd("..");
             _ ->
                ignore
@@ -25,7 +25,7 @@ main(Args) ->
       {ok, Files} ->
          lists:foreach(FunCom, Files);
       _Err ->
-         rebar:log(error, "eNpc start compile error ~p ~n", [_Err])
+         npRMain:log(error, "eNpc start compile error ~p ~n", [_Err])
 
    end.
 

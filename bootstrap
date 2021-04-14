@@ -24,8 +24,8 @@ main(Args) ->
       true ->
          rm("ebin/*.beam");
       false ->
-         case filelib:is_file("ebin/rebar.beam") of
-            true -> rm("ebin/rebar.beam");
+         case filelib:is_file("ebin/npRMain.beam") of
+            true -> rm("ebin/npRMain.beam");
             false -> io:fwrite("No beam files found.~n")
          end
    end,
@@ -44,7 +44,7 @@ main(Args) ->
    %% At the same time, their counterparts dict() and digraph() are to be
    %% deprecated in Erlang 18. namespaced_types option is used to select
    %% proper type name depending on the OTP version used.
-   %% Extract the system info of the version of OTP we use to compile rebar
+   %% Extract the system info of the version of OTP we use to compile npRMain
    %% NamespacedTypes =
    %%    case is_otp(OtpInfo, "^[0-9]+") of
    %%       true -> {d, namespaced_types};
@@ -53,7 +53,7 @@ main(Args) ->
 
    %% Compile all src/*.erl to ebin
    %% To not accidentally try to compile files like Mac OS X resource forks,
-   %% we only look for rebar source files that start with a letter.
+   %% we only look for npRMain source files that start with a letter.
    Opts = [
       DebugFlag,
       {outdir, "ebin"},
@@ -82,10 +82,10 @@ main(Args) ->
    %% Add ebin/ to our path
    true = code:add_path("ebin"),
 
-   %% Run rebar compile to do proper .app validation etc.
-   %% and rebar escriptize to create the rebar script
+   %% Run npRMain compile to do proper .app validation etc.
+   %% and npRMain escriptize to create the npRMain script
    %% RebarArgs = Args -- ["debug"], %% Avoid trying to run 'debug' command
-   % rebar:main(["compile"] ++ RebarArgs),
+   % npRMain:main(["compile"] ++ RebarArgs),
 
    escriptize(),
 
