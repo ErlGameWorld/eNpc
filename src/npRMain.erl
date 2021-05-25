@@ -162,15 +162,15 @@ runAux(BaseConfig, Commands) ->
 
    %% Make sure we're an app directory
     AppFile = "",
-   %%    case rebarUtils:isAppDir() of
+   %%    case npRUtils:isAppDir() of
    %%       {true, AppFile0} ->
    %%          AppFile0;
    %%       false ->
-   %%          rebarUtils:delayedHalt(1)
+   %%          npRUtils:delayedHalt(1)
    %%    end,
 
    % Setup our environment
-   BaseConfig2 = setupEnvs(BaseConfig1, [rebarNpCompiler]),
+   BaseConfig2 = setupEnvs(BaseConfig1, [npRCompiler]),
    %% Process each command, resetting any state between each one
    lists:foreach(
       fun(Command) ->
