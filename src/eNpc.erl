@@ -10,7 +10,8 @@ main(Args) ->
    io:format("eNpc begin compile pwd:~15.p ~n", [Dir]),
    FunCom =
       fun(File) ->
-         case filelib:is_dir(File) == true andalso lists:nth(1, File) =/= 46 andalso filename:basename(File) =/= "include" of
+         RebarCfgFile =  File ++ "/rebar.config",
+         case filelib:is_dir(File) == true andalso filelib:is_file(RebarCfgFile) andalso lists:nth(1, File) =/= 46 andalso filename:basename(File) =/= "include" of
             true ->
                {ok, CurDir} = file:get_cwd(),
                io:format("eNpc cur ~p: ~-18.s,  cur pwd:~p ~n", [Args, File, CurDir]),
