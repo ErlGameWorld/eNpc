@@ -11,8 +11,8 @@ default_env
 1. Add these (or similar) hooks to your rebar.config:
 
 ```erlang
-{pre_hooks, [{"", compile, "escript c_src/eNpc compile"}]}.
-{post_hooks, [{"", clean, "escript c_src/eNpc clean"}]}.
+{pre_hooks, [{"", compile, "eNpc compile"}]}.
+{post_hooks, [{"", clean, "eNpc clean"}]}.
 ```
 
 After that eNpc should read your old rebar.config `port_specs` and `port_env` settings as expected (it is rebar2's port compiler after all...).
