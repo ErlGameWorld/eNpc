@@ -7,7 +7,7 @@
 default_env
 1. Clone this repository
 1. Run `make` in this directory
-1. Copy `eNpc` to your project "c_src" dir and commit it
+1. Copy `eNpc` to your "path" environment variable
 1. Add these (or similar) hooks to your rebar.config:
 
 ```erlang
