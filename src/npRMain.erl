@@ -1,5 +1,6 @@
 -module(npRMain).
 
+-compile([export_all]).
 -export([
    main/1,
    log/3
@@ -150,7 +151,7 @@ initConfig_1(BaseConfig) ->
 
 runAux(BaseConfig, Commands) ->
    %% Make sure crypto is running
-   case crypto:start() of
+   case application:start(crypto) of
       ok -> ok;
       {error, {already_started, crypto}} -> ok
    end,

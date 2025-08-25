@@ -156,6 +156,7 @@ writeWindowsScripts() ->
       "@echo off\r\n"
       "setlocal\r\n"
       "set rebarscript=%~f0\r\n"
+      "chcp 65001 > nul\r\n"
       "escript.exe \"%rebarscript:.cmd=%\" %*\r\n",
    ok = file:write_file("eNpc.cmd", CmdScript).
 
