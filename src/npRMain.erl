@@ -1,6 +1,5 @@
 -module(npRMain).
 
--compile([export_all]).
 -export([
    main/1,
    log/3
