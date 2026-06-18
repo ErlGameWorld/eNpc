@@ -22,7 +22,7 @@
 -define(DEFAULT_JOBS, 3).
 
 main(Args) ->
-   case catch (run(Args)) of
+   try run(Args) of
       ok ->
          ok;
       rebar_abort ->
@@ -32,6 +32,10 @@ main(Args) ->
          %% Dump this error to console
          io:format("Uncaught error in rebar_core: ~p\n", [Error]),
          npRUtils:delayedHalt(1)
+   catch C:R:S ->
+		 %% Catch any error and dump to console
+		 io:format("Error in rebar_core: ~p, ~p, ~p\n", [C, R, S]),
+		 npRUtils:delayedHalt(1)
    end.
 
 log(Level, Format, Args) ->
